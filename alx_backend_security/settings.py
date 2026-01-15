@@ -123,3 +123,13 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+RATELIMIT_VIEW = 'ip_tracking.views.ratelimit_error'
+
+CELERY_BEAT_SCHEDULE = {
+    'detect-anomalies-every-hour': {
+        'task': 'ip_tracking.tasks.detect_suspicious_ips',
+        'schedule': 3600.0,  # Every 3600 seconds
+    },
+}
