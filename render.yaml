@@ -1,0 +1,42 @@
+services:
+  # The Web App
+  - type: web
+    name: ip-tracker-web
+    env: python
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --no-input && python manage.py migrate
+    startCommand: gunicorn alx_backend_security.wsgi:application
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ip-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: ip-redis
+          property: connectionString
+
+  # The Celery Worker
+  - type: worker
+    name: ip-tracker-worker
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: celery -A alx_backend_security worker --loglevel=info
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ip-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: ip-redis
+          property: connectionString
+
+databases:
+  - name: ip-db
+    plan: free
+
+redis:
+  - name: ip-redis
+    plan: free
